@@ -1,0 +1,13 @@
+block.png
+size:128,32
+repeat:none
+dirt
+bounds:55,1,16,16
+grass
+bounds:37,1,16,16
+miniplant1
+bounds:19,1,16,16
+miniplant2
+bounds:1,1,16,16
+miniplant3
+bounds:73,1,16,16
