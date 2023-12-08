@@ -10,7 +10,6 @@ import lombok.Getter;
 public class MiniBlock extends Game {
     public static final int V_WIDTH = 16;
     public static final int V_HEIGHT = 9;
-    public static final float SCALE = 1f;
     public static boolean DEBUG = true;
     private SpriteBatch batch;
     private BitmapFont font;

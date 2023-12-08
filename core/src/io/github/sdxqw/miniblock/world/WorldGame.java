@@ -2,11 +2,8 @@ package io.github.sdxqw.miniblock.world;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -33,9 +30,9 @@ public class WorldGame extends ScreenAdapter {
 
     public WorldGame(MiniBlock game) {
         this.game = game;
-        this.world = new World(new Vector2(0, 0), true);
+        world = new World(new Vector2(0, 0), true);
 
-        viewport = new FitViewport(MiniBlock.V_WIDTH / MiniBlock.SCALE, MiniBlock.V_HEIGHT / MiniBlock.SCALE);
+        viewport = new FitViewport(MiniBlock.V_WIDTH, MiniBlock.V_HEIGHT);
         hud = new HUD(game.getBatch());
 
         worldTerrain = new WorldTerrain(2, 2);
