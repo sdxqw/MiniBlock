@@ -39,7 +39,7 @@ public class WorldGame extends ScreenAdapter {
 
         worldTerrain = new WorldTerrain();
 
-        player = new Player(world, this);
+        player = new Player(1000, 1000, 0.2f, world, this);
         playerPos = player.getBody2D().getPosition();
     }
 

@@ -6,18 +6,13 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Disposable;
 import io.github.sdxqw.miniblock.MiniBlock;
 import io.github.sdxqw.miniblock.animation.PlayerAnimation;
 import io.github.sdxqw.miniblock.blocks.BlockBreak;
 import io.github.sdxqw.miniblock.blocks.BlockStack;
-import io.github.sdxqw.miniblock.world.Box2DHelper;
 import io.github.sdxqw.miniblock.world.WorldGame;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,33 +21,24 @@ import static io.github.sdxqw.miniblock.entity.Player.State.*;
 import static io.github.sdxqw.miniblock.terrain.WorldTerrain.VIEW_DISTANCE;
 
 @Getter
-public class Player implements Disposable {
-    public static final int PLAYER_SIZE = 1;
-
-    private final World world;
+@Setter
+public class Player extends Entity {
     private final Box2DDebugRenderer debugRenderer;
-    private final Body body2D;
-    private final WorldGame worldGame;
     private final ShapeRenderer shapeRenderer;
-    private final float speed = .5f;
     private final PlayerAnimation playerAnimation;
+    private WorldGame worldGame;
     private State currentState;
-    @Setter
-    private float x = 1000;
-    @Setter
-    private float y = 1000;
     private BlockBreak blockBreak;
 
-    public Player(World world, WorldGame worldGame) {
-        this.world = world;
+    public Player(int x, int y, float speed, World world, WorldGame worldGame) {
+        super(x, y, speed, world);
         this.worldGame = worldGame;
-        this.shapeRenderer = new ShapeRenderer();
-        this.body2D = Box2DHelper.createBody(world, PLAYER_SIZE / 2f, PLAYER_SIZE / 2f, new Vector2(getX(), getY()), BodyDef.BodyType.KinematicBody);
-        this.debugRenderer = new Box2DDebugRenderer();
-        this.playerAnimation = new PlayerAnimation();
-        currentState = IDLE;
+        shapeRenderer = new ShapeRenderer();
+        debugRenderer = new Box2DDebugRenderer();
+        playerAnimation = new PlayerAnimation();
     }
 
+    @Override
     public void update(float deltaTime) {
         Camera camera = worldGame.getViewport().getCamera();
         Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
@@ -65,34 +51,31 @@ public class Player implements Disposable {
     }
 
     private void interactWithBlock(Vector3 mousePos, float deltaTime) {
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && isInRange(mousePos)) {
             int blockX = (int) mousePos.x;
             int blockY = (int) mousePos.y;
-
-            if (isInRange(mousePos)) {
-                BlockStack blockStack = worldGame.getWorldTerrain().getChunk(blockX, blockY).getBlock(blockX, blockY);
-                if (blockStack == null) return;
-
+            BlockStack blockStack = worldGame.getWorldTerrain().getChunk(blockX, blockY).getBlock(blockX, blockY);
+            if (blockStack != null) {
                 blockBreak = new BlockBreak(blockStack, worldGame.getWorldTerrain().getBlockBreakAnimation());
                 blockBreak.breakBlock(deltaTime);
             }
-        } else {
-            if (blockBreak != null) {
-                blockBreak.stopBreaking();
-            }
+        } else if (blockBreak != null) {
+            blockBreak.stopBreaking();
         }
     }
 
     private void updatePosition(Vector3 mousePos, float playerX, float playerY) {
         float dx = mousePos.x - playerX;
         float dy = mousePos.y - playerY;
+        setCurrentState(getDirection(dx, dy));
+    }
 
-        boolean abs = Math.abs(dx) > Math.abs(dy);
-        if (abs) {
-            currentState = dx > 0 ? IDLE_RIGTH : IDLE_LEFT;
-        } else {
-            currentState = dy > 0 ? IDLE_BEHIND : IDLE;
-        }
+    private int getDirection(float dx, float dy) {
+        if (dx > 0 && dy > 0) return 0;
+        if (dx < 0 && dy > 0) return 1;
+        if (dx > 0 && dy < 0) return 2;
+        if (dx < 0 && dy < 0) return 3;
+        return 0;
     }
 
     private void handleInput() {
@@ -100,35 +83,44 @@ public class Player implements Disposable {
         float speedY = 0;
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            speedY = speed;
-            currentState = IDLE_BEHIND;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            speedY = -speed;
-            currentState = IDLE;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            speedX = -speed;
-            currentState = IDLE_LEFT;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            speedX = speed;
-            currentState = IDLE_RIGTH;
+            speedY = getSpeed();
         }
 
-        body2D.setLinearVelocity(speedX, speedY);
-        setX(body2D.getPosition().x);
-        setY(body2D.getPosition().y);
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            speedY = -getSpeed();
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            speedX = -getSpeed();
+        }
+
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            speedX = getSpeed();
+        }
+
+        getBody2D().setLinearVelocity(speedX, speedY);
+        setX(getBody2D().getPosition().x);
+        setY(getBody2D().getPosition().y);
     }
 
+    private void setCurrentState(int direction) {
+        currentState = switch (direction) {
+            case 0 -> IDLE;
+            case 1 -> IDLE_BEHIND;
+            case 2 -> IDLE_RIGTH;
+            case 3 -> IDLE_LEFT;
+            default -> throw new IllegalStateException("Unexpected value: " + direction);
+        };
+    }
 
+    @Override
     public void render(SpriteBatch batch) {
         TextureRegion currentFrame = playerAnimation.getCurrentFrame(currentState.getIndex());
-        batch.draw(currentFrame, getX() - PLAYER_SIZE / 2f, getY() - PLAYER_SIZE / 2f, PLAYER_SIZE, PLAYER_SIZE);
+        batch.draw(currentFrame, getX() - ENTITY_SIZE / 2f, getY() - ENTITY_SIZE / 2f, ENTITY_SIZE, ENTITY_SIZE);
     }
 
     public void renderDebug(Camera camera) {
-        if (MiniBlock.DEBUG) debugRenderer.render(world, camera.combined);
+        if (MiniBlock.DEBUG) debugRenderer.render(getWorld(), camera.combined);
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(1, 0, 0, 1);
@@ -144,7 +136,7 @@ public class Player implements Disposable {
     }
 
     private boolean isInRange(Vector3 mousePos) {
-        return Math.abs((int) getX() - mousePos.x) < VIEW_DISTANCE && Math.abs((int) getY() - mousePos.y) < VIEW_DISTANCE;
+        return Math.abs(getX() - mousePos.x) < VIEW_DISTANCE && Math.abs(getY() - mousePos.y) < VIEW_DISTANCE;
     }
 
     @Override
