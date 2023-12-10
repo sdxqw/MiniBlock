@@ -5,7 +5,8 @@ import lombok.Getter;
 
 @Getter
 public class Grass extends Block {
-    public Grass() {
+    public Grass(int x, int y) {
+        super(x, y);
         setTextureID(TextureID.GRASS);
     }
 }

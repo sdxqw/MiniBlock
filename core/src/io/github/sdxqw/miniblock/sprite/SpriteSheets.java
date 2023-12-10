@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Getter
 public class SpriteSheets {
     private final TextureAtlas atlas;
     @Getter
