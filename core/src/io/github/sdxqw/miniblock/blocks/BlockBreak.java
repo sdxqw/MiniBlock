@@ -18,7 +18,7 @@ public class BlockBreak {
             topBlock.decreaseHealth(breakTime, deltaTime);
             if (topBlock.isDestroyed()) {
                 blockStack.removeTopBlock();
-                topBlock.setBreaking(false);
+                stopBreaking();
             }
         }
     }

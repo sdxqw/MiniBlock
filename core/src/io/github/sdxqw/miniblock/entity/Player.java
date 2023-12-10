@@ -18,7 +18,6 @@ import io.github.sdxqw.miniblock.MiniBlock;
 import io.github.sdxqw.miniblock.animation.CustomAnimation;
 import io.github.sdxqw.miniblock.blocks.BlockBreak;
 import io.github.sdxqw.miniblock.blocks.BlockStack;
-import io.github.sdxqw.miniblock.blocks.Grass;
 import io.github.sdxqw.miniblock.sprite.SpriteSheets;
 import io.github.sdxqw.miniblock.world.Box2DHelper;
 import io.github.sdxqw.miniblock.world.WorldGame;
@@ -69,12 +68,53 @@ public class Player implements Disposable {
     }
 
     public void update(float deltaTime) {
+        Camera camera = worldGame.getViewport().getCamera();
+        Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+        camera.unproject(mousePos);
+
+        handleInput();
+        updatePosition(mousePos, getX(), getY(), deltaTime);
+        interactWithBlock(mousePos, deltaTime);
+    }
+
+    private void interactWithBlock(Vector3 mousePos, float deltaTime) {
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            int blockX = (int) mousePos.x;
+            int blockY = (int) mousePos.y;
+
+            if (Math.abs((int) getX() - mousePos.x) < VIEW_DISTANCE && Math.abs((int) getY() - mousePos.y) < VIEW_DISTANCE) {
+                BlockStack blockStack = worldGame.getWorldTerrain().getChunk(blockX, blockY).getBlock(blockX, blockY);
+
+                blockBreak = new BlockBreak(blockStack);
+                blockBreak.breakBlock(deltaTime);
+                if (blockStack.getTopBlock().isBreaking()) {
+                    worldGame.getWorldTerrain().getBlockBreakAnimation().updateFrames(deltaTime);
+                }
+            }
+        } else {
+            if (blockBreak != null) {
+                blockBreak.stopBreaking();
+            }
+        }
+    }
+
+    private void updatePosition(Vector3 mousePos, float playerX, float playerY, float deltaTime) {
+        float dx = mousePos.x - playerX;
+        float dy = mousePos.y - playerY;
+
+        boolean abs = Math.abs(dx) > Math.abs(dy);
+        if (abs) {
+            currentState = dx > 0 ? IDLE_RIGTH : IDLE_LEFT;
+        } else {
+            currentState = dy > 0 ? IDLE_BEHIND : IDLE;
+        }
+
+        totalElapsedTime += deltaTime;
+    }
+
+    private void handleInput() {
         float speedX = 0;
         float speedY = 0;
-
-        Camera camera = worldGame.getViewport().getCamera();
-        float playerX = getX();
-        float playerY = getY();
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             speedY = speed;
@@ -96,54 +136,6 @@ public class Player implements Disposable {
         body2D.setLinearVelocity(speedX, speedY);
         setX(body2D.getPosition().x);
         setY(body2D.getPosition().y);
-
-        Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-        camera.unproject(mousePos);
-
-        float dx = mousePos.x - playerX;
-        float dy = mousePos.y - playerY;
-
-        boolean abs = Math.abs(dx) > Math.abs(dy);
-        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-            if (abs) {
-                currentState = dx > 0 ? IDLE_RIGTH : IDLE_LEFT;
-            } else {
-                currentState = dy > 0 ? IDLE_BEHIND : IDLE;
-            }
-
-            int blockX = (int) mousePos.x;
-            int blockY = (int) mousePos.y;
-            if (Math.abs((int) getX() - mousePos.x) < VIEW_DISTANCE && Math.abs((int) getY() - mousePos.y) < VIEW_DISTANCE)
-                worldGame.getWorldTerrain().setBlock(blockX, blockY, new Grass(blockX, blockY));
-        }
-
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            if (abs) {
-                currentState = dx > 0 ? IDLE_RIGTH : IDLE_LEFT;
-            } else {
-                currentState = dy > 0 ? IDLE_BEHIND : IDLE;
-            }
-
-            int blockX = (int) mousePos.x;
-            int blockY = (int) mousePos.y;
-
-            if (Math.abs((int) getX() - mousePos.x) < VIEW_DISTANCE && Math.abs((int) getY() - mousePos.y) < VIEW_DISTANCE) {
-                BlockStack blockStack = worldGame.getWorldTerrain().getChunk(blockX, blockY).getBlock(blockX, blockY);
-
-                blockBreak = new BlockBreak(blockStack);
-                blockBreak.breakBlock(deltaTime);
-                if (blockStack.getTopBlock().isBreaking()) {
-                    worldGame.getWorldTerrain().getBlockBreakAnimation().updateFrames(deltaTime);
-                }
-            }
-        } else {
-            if (blockBreak != null) {
-                blockBreak.stopBreaking();
-                blockBreak = null;
-            }
-        }
-
-        totalElapsedTime += deltaTime;
     }
 
 
