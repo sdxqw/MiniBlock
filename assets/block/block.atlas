@@ -5,9 +5,12 @@ dirt
 bounds:55,1,16,16
 grass
 bounds:37,1,16,16
-miniplant1
-bounds:19,1,16,16
-miniplant2
+miniplant
+index:1
 bounds:1,1,16,16
-miniplant3
+miniplant
+index:3
+bounds:19,1,16,16
+miniplant
+index:2
 bounds:73,1,16,16

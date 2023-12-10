@@ -39,6 +39,10 @@ public class SpriteSheets {
         atlas.getTextures().forEach(texture -> texture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest));
     }
 
+    public Optional<TextureRegion> getTextureRegion(TextureID id, int index) {
+        return Optional.ofNullable(atlas.findRegion(id.name().toLowerCase(), index));
+    }
+
     public Optional<TextureRegion> getTextureRegion(TextureID id) {
         return Optional.ofNullable(textureRegions.get(id));
     }

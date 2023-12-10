@@ -2,59 +2,60 @@ package io.github.sdxqw.miniblock.blocks;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import io.github.sdxqw.miniblock.animation.BlockBreakAnimation;
 import io.github.sdxqw.miniblock.sprite.SpriteSheets;
 import io.github.sdxqw.miniblock.sprite.TextureID;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Optional;
-
 @Setter
 @Getter
 public class Block {
     public static final int BLOCK_SIZE = 1;
-    private TextureID textureID;
-    private float blockHealth;
-    private int x;
-    private int y;
+    private float blockHealth = 1;
+    private float currentBlockHealth = blockHealth;
+    private int indexBlock = -1;
 
     private boolean isBreaking = false;
     private boolean canBeBroken = false;
 
+    private int x;
+    private int y;
+
+    private TextureID textureID = TextureID.AIR;
+
     public Block(int x, int y) {
         this.x = x;
         this.y = y;
-        this.blockHealth = 1;
-        this.textureID = TextureID.AIR;
     }
 
     public void decreaseHealth(float amount, float deltaTime) {
-        blockHealth -= amount * deltaTime;
-        if (blockHealth <= 0) blockHealth = 0;
+        currentBlockHealth -= amount * deltaTime;
+        System.out.println(currentBlockHealth);
     }
 
     public void renderBlock(SpriteBatch batch, BlockBreakAnimation blockBreakAnimation, SpriteSheets spriteSheets, int x, int y) {
-        if (this instanceof Air) return;
+        if (textureID == TextureID.AIR) return;
+        validateTextureID();
+        TextureRegion region = getTextureRegion(spriteSheets, textureID);
+        batch.draw(region, x, y, Block.BLOCK_SIZE, Block.BLOCK_SIZE);
 
-        if (textureID == null) throw new IllegalStateException("TextureID is null, please set it before rendering");
-
-        Optional<TextureRegion> region = spriteSheets.getTextureRegion(textureID);
-        if (region.isEmpty())
-            throw new IllegalStateException("TextureRegion is null, please check if the textureID is valid");
-        batch.draw(region.get(), x, y, Block.BLOCK_SIZE, Block.BLOCK_SIZE);
-
-        if (!canBeBroken) return;
-
-        if (blockBreakAnimation != null && isBreaking) {
-            blockBreakAnimation.setFrameDuration(blockHealth);
-            TextureRegion breakingFrame = blockBreakAnimation.getCurrentFrame();
+        if (canBeBroken && blockBreakAnimation != null && isBreaking && !isDestroyed()) {
+            TextureRegion breakingFrame = blockBreakAnimation.getCurrentFrame(0);
             batch.draw(breakingFrame, x, y, Block.BLOCK_SIZE, Block.BLOCK_SIZE);
         }
     }
 
+    private TextureRegion getTextureRegion(SpriteSheets spriteSheets, TextureID textureID) {
+        return indexBlock == -1 ? spriteSheets.getTextureRegion(textureID).orElseThrow() : spriteSheets.getTextureRegion(textureID, indexBlock).orElseThrow();
+    }
+
+    private void validateTextureID() {
+        if (textureID == null) throw new IllegalStateException("TextureID is null, please set it before rendering");
+    }
 
     public boolean isDestroyed() {
-        return blockHealth <= 0;
+        return currentBlockHealth <= 0;
     }
 
     @Override
@@ -62,4 +63,3 @@ public class Block {
         return "Block{" + "texture=" + textureID + '}';
     }
 }
-

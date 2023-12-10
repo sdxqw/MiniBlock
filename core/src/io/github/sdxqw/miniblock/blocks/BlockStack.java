@@ -18,12 +18,15 @@ public class BlockStack {
     }
 
     public void removeTopBlock() {
-        if (!blocks.isEmpty()) {
+        if (!blocks.isEmpty() && blocks.size() > 1) {
             blocks.remove(blocks.size() - 1);
         }
     }
 
     public Block getTopBlock() {
-        return blocks.isEmpty() ? null : blocks.get(blocks.size() - 1);
+        if (!blocks.isEmpty() && blocks.size() > 1) {
+            return blocks.get(blocks.size() - 1);
+        }
+        return null;
     }
 }

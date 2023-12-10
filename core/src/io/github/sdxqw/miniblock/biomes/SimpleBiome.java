@@ -16,7 +16,7 @@ public class SimpleBiome extends Biome {
         List<Block> blockList = new ArrayList<>();
         blockList.add(blocks.get(Math.random() < 0.5 ? 0 : 1));
         if (blockList.get(0) instanceof Grass && Math.random() < 0.1) {
-            blockList.add(new Plants(x, y, (int) (Math.random() * 2)));
+            blockList.add(new Plants(x, y, 1));
         }
         return blockList;
     }
