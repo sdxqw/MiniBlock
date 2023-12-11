@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import io.github.sdxqw.miniblock.sprite.SpriteSheets;
 import io.github.sdxqw.miniblock.sprite.TextureID;
+import io.github.sdxqw.miniblock.world.WorldGame;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,22 +24,27 @@ public class Block {
 
     private TextureID textureID = TextureID.AIR;
 
-    public Block(int x, int y) {
+    private BlockBreak blockBreak;
+
+    public Block(int x, int y, WorldGame game) {
         this.x = x;
         this.y = y;
+        if (game == null) return;
+        this.blockBreak = new BlockBreak(game, game.getBlockBreakAnimation());
     }
 
     public void decreaseHealth(float amount, float deltaTime) {
         currentBlockHealth -= amount * deltaTime;
     }
 
-    public void renderBlock(SpriteBatch batch, BlockBreak blockBreak, SpriteSheets spriteSheets, int x, int y) {
-        if (textureID == TextureID.AIR) return;
+    public void renderBlock(SpriteBatch batch, SpriteSheets spriteSheets, int x, int y) {
+        if (textureID == TextureID.AIR || this instanceof Air) return;
         validateTextureID();
         TextureRegion region = getTextureRegion(spriteSheets, textureID);
         batch.draw(region, x, y, Block.BLOCK_SIZE, Block.BLOCK_SIZE);
 
-        if (canBeBroken && blockBreak != null && isBreaking && !isDestroyed()) {
+        if (blockBreak == null) return;
+        if (canBeBroken && isBreaking && !isDestroyed()) {
             TextureRegion breakingFrame = blockBreak.getBlockBreakAnimation().getCurrentFrame(0);
             batch.draw(breakingFrame, x, y, Block.BLOCK_SIZE, Block.BLOCK_SIZE);
         }

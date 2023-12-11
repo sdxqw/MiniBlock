@@ -24,13 +24,13 @@ public class WorldTerrain implements Disposable {
     public static final int VIEW_DISTANCE = 3;
     private final Map<GridPoint2, Chunk> worldChunks = new HashMap<>();
     private final SpriteSheets blocks;
-    private final BlockBreakAnimation blockBreakAnimation;
 
     private final BlockBreak blockBreak;
+    private final WorldGame game;
 
-    public WorldTerrain(WorldGame game) {
+    public WorldTerrain(WorldGame game, BlockBreakAnimation blockBreakAnimation) {
+        this.game = game;
         this.blocks = new SpriteSheets("block/block.atlas");
-        this.blockBreakAnimation = new BlockBreakAnimation();
         this.blockBreak = new BlockBreak(game, blockBreakAnimation);
     }
 
@@ -41,7 +41,7 @@ public class WorldTerrain implements Disposable {
         List<Biome> biomes = List.of(new SimpleBiome());
         if (worldChunks.get(new GridPoint2(chunkX, chunkY)) != null) return;
         for (Biome biome : biomes) {
-            Chunk chunk = new Chunk(x, y, biome);
+            Chunk chunk = new Chunk(x, y, biome, game);
             worldChunks.put(new GridPoint2(chunkX, chunkY), chunk);
         }
     }
@@ -68,7 +68,7 @@ public class WorldTerrain implements Disposable {
             int chunkY = chunk.getChunkY() * CHUNK_SIZE;
 
             if (chunkX >= 0 && chunkY >= 0 && camera.frustum.boundsInFrustum(chunkX, chunkY, 0, (float) CHUNK_SIZE / 2 * VIEW_DISTANCE, (float) CHUNK_SIZE / 2 * VIEW_DISTANCE, 0)) {
-                chunk.renderChunk(batch, blockBreak, blocks);
+                chunk.renderChunk(batch, blocks);
             }
         }
     }
@@ -76,6 +76,5 @@ public class WorldTerrain implements Disposable {
     @Override
     public void dispose() {
         blocks.dispose();
-        blockBreakAnimation.dispose();
     }
 }

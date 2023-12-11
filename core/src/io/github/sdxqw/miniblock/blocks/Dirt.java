@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public class Dirt extends Block {
     public Dirt(int x, int y) {
-        super(x, y);
+        super(x, y, null);
         setTextureID(TextureID.DIRT);
     }
 }

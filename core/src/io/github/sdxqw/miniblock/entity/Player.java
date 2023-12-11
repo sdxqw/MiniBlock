@@ -35,7 +35,7 @@ public class Player extends Entity {
         shapeRenderer = new ShapeRenderer();
         debugRenderer = new Box2DDebugRenderer();
         playerAnimation = new PlayerAnimation();
-        blockBreak = new BlockBreak(worldGame, worldGame.getWorldTerrain().getBlockBreakAnimation());
+        blockBreak = new BlockBreak(worldGame, worldGame.getBlockBreakAnimation());
     }
 
     @Override

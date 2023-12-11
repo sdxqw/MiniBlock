@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.sdxqw.miniblock.MiniBlock;
+import io.github.sdxqw.miniblock.animation.BlockBreakAnimation;
 import io.github.sdxqw.miniblock.entity.Player;
 import io.github.sdxqw.miniblock.hud.HUD;
 import io.github.sdxqw.miniblock.terrain.WorldTerrain;
@@ -28,6 +29,7 @@ public class WorldGame extends ScreenAdapter {
     private final World world;
     private final Vector2 playerPos;
     private final WorldTerrain worldTerrain;
+    private final BlockBreakAnimation blockBreakAnimation;
 
 
     public WorldGame(MiniBlock game) {
@@ -37,7 +39,8 @@ public class WorldGame extends ScreenAdapter {
         viewport = new ExtendViewport(MiniBlock.V_WIDTH, MiniBlock.V_HEIGHT);
         hud = new HUD(game.getBatch());
 
-        worldTerrain = new WorldTerrain(this);
+        blockBreakAnimation = new BlockBreakAnimation();
+        worldTerrain = new WorldTerrain(this, blockBreakAnimation);
 
         player = new Player(1000, 1000, 0.2f, world, this);
         playerPos = player.getBody2D().getPosition();
@@ -99,5 +102,6 @@ public class WorldGame extends ScreenAdapter {
         hud.dispose();
         world.dispose();
         player.dispose();
+        blockBreakAnimation.dispose();
     }
 }

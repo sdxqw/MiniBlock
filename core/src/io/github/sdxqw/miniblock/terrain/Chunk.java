@@ -4,9 +4,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.GridPoint2;
 import io.github.sdxqw.miniblock.biomes.Biome;
 import io.github.sdxqw.miniblock.blocks.Block;
-import io.github.sdxqw.miniblock.blocks.BlockBreak;
 import io.github.sdxqw.miniblock.blocks.BlockStack;
 import io.github.sdxqw.miniblock.sprite.SpriteSheets;
+import io.github.sdxqw.miniblock.world.WorldGame;
 import lombok.Getter;
 
 import java.util.HashMap;
@@ -20,14 +20,14 @@ public class Chunk {
     private final int chunkX;
     private final int chunkY;
 
-    public Chunk(int chunkX, int chunkY, Biome biome) {
+    public Chunk(int chunkX, int chunkY, Biome biome, WorldGame worldGame) {
         this.chunkX = chunkX / CHUNK_SIZE;
         this.chunkY = chunkY / CHUNK_SIZE;
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int y = 0; y < CHUNK_SIZE; y++) {
                 GridPoint2 position = new GridPoint2(x, y);
                 BlockStack blockStack = new BlockStack();
-                blockStack.getBlocks().addAll(biome.generateBlock(x, y));
+                blockStack.getBlocks().addAll(biome.generateBlock(x, y, worldGame));
                 chunkBlocks.put(position, blockStack);
             }
         }
@@ -53,14 +53,14 @@ public class Chunk {
         return blockStack != null ? blockStack : new BlockStack();
     }
 
-    public void renderChunk(SpriteBatch batch, BlockBreak animation, SpriteSheets spriteSheets) {
+    public void renderChunk(SpriteBatch batch, SpriteSheets spriteSheets) {
         for (Map.Entry<GridPoint2, BlockStack> entry : chunkBlocks.entrySet()) {
             GridPoint2 position = entry.getKey();
             BlockStack blockStack = entry.getValue();
             int blockX = position.x + chunkX * CHUNK_SIZE;
             int blockY = position.y + chunkY * CHUNK_SIZE;
             for (Block block : blockStack.getBlocks()) {
-                block.renderBlock(batch, animation, spriteSheets, blockX, blockY);
+                block.renderBlock(batch, spriteSheets, blockX, blockY);
             }
         }
     }
