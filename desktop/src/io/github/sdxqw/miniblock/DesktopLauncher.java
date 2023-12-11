@@ -8,6 +8,8 @@ public class DesktopLauncher {
         Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
         config.setTitle("MiniBlock");
         config.setIdleFPS(30);
+        config.setResizable(false);
+        config.setWindowedMode(1280, 720);
         new Lwjgl3Application(new MiniBlock(), config);
     }
 }

@@ -37,7 +37,7 @@ public class WorldGame extends ScreenAdapter {
         viewport = new ExtendViewport(MiniBlock.V_WIDTH, MiniBlock.V_HEIGHT);
         hud = new HUD(game.getBatch());
 
-        worldTerrain = new WorldTerrain();
+        worldTerrain = new WorldTerrain(this);
 
         player = new Player(1000, 1000, 0.2f, world, this);
         playerPos = player.getBody2D().getPosition();

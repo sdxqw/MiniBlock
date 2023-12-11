@@ -8,7 +8,9 @@ import io.github.sdxqw.miniblock.animation.BlockBreakAnimation;
 import io.github.sdxqw.miniblock.biomes.Biome;
 import io.github.sdxqw.miniblock.biomes.SimpleBiome;
 import io.github.sdxqw.miniblock.blocks.Block;
+import io.github.sdxqw.miniblock.blocks.BlockBreak;
 import io.github.sdxqw.miniblock.sprite.SpriteSheets;
+import io.github.sdxqw.miniblock.world.WorldGame;
 import lombok.Getter;
 
 import java.util.HashMap;
@@ -24,9 +26,12 @@ public class WorldTerrain implements Disposable {
     private final SpriteSheets blocks;
     private final BlockBreakAnimation blockBreakAnimation;
 
-    public WorldTerrain() {
+    private final BlockBreak blockBreak;
+
+    public WorldTerrain(WorldGame game) {
         this.blocks = new SpriteSheets("block/block.atlas");
         this.blockBreakAnimation = new BlockBreakAnimation();
+        this.blockBreak = new BlockBreak(game, blockBreakAnimation);
     }
 
     public void generateWorld(int x, int y) {
@@ -63,7 +68,7 @@ public class WorldTerrain implements Disposable {
             int chunkY = chunk.getChunkY() * CHUNK_SIZE;
 
             if (chunkX >= 0 && chunkY >= 0 && camera.frustum.boundsInFrustum(chunkX, chunkY, 0, (float) CHUNK_SIZE / 2 * VIEW_DISTANCE, (float) CHUNK_SIZE / 2 * VIEW_DISTANCE, 0)) {
-                chunk.renderChunk(batch, blockBreakAnimation, blocks);
+                chunk.renderChunk(batch, blockBreak, blocks);
             }
         }
     }

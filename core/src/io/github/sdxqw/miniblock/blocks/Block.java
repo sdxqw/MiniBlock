@@ -2,7 +2,6 @@ package io.github.sdxqw.miniblock.blocks;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import io.github.sdxqw.miniblock.animation.BlockBreakAnimation;
 import io.github.sdxqw.miniblock.sprite.SpriteSheets;
 import io.github.sdxqw.miniblock.sprite.TextureID;
 import lombok.Getter;
@@ -33,14 +32,14 @@ public class Block {
         currentBlockHealth -= amount * deltaTime;
     }
 
-    public void renderBlock(SpriteBatch batch, BlockBreakAnimation blockBreakAnimation, SpriteSheets spriteSheets, int x, int y) {
+    public void renderBlock(SpriteBatch batch, BlockBreak blockBreak, SpriteSheets spriteSheets, int x, int y) {
         if (textureID == TextureID.AIR) return;
         validateTextureID();
         TextureRegion region = getTextureRegion(spriteSheets, textureID);
         batch.draw(region, x, y, Block.BLOCK_SIZE, Block.BLOCK_SIZE);
 
-        if (canBeBroken && blockBreakAnimation != null && isBreaking && !isDestroyed()) {
-            TextureRegion breakingFrame = blockBreakAnimation.getCurrentFrame(0);
+        if (canBeBroken && blockBreak != null && isBreaking && !isDestroyed()) {
+            TextureRegion breakingFrame = blockBreak.getBlockBreakAnimation().getCurrentFrame(0);
             batch.draw(breakingFrame, x, y, Block.BLOCK_SIZE, Block.BLOCK_SIZE);
         }
     }

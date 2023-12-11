@@ -11,6 +11,8 @@ public class BlockBreak {
     private final float breakTime = 2f;
     private final BlockBreakAnimation blockBreakAnimation;
 
+    private boolean isBreaking = false;
+
     public BlockBreak(WorldGame worldGame, BlockBreakAnimation blockBreakAnimation) {
         this.worldGame = worldGame;
         this.blockBreakAnimation = blockBreakAnimation;
@@ -22,6 +24,7 @@ public class BlockBreak {
 
     public void breakBlock(float deltaTime) {
         if (blockStack == null) return;
+        isBreaking = true;
         Block topBlock = blockStack.getTopBlock();
         if (topBlock != null) {
             topBlock.setBreaking(true);
@@ -35,6 +38,7 @@ public class BlockBreak {
 
     private void startAnimationBreak(float deltaTime) {
         if (blockStack == null) return;
+        isBreaking = false;
         Block topBlock = blockStack.getTopBlock();
         if (topBlock != null) {
             blockBreakAnimation.setFrameDuration(topBlock.getBlockHealth());
