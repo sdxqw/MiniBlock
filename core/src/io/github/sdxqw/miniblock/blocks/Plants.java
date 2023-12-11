@@ -7,7 +7,8 @@ public class Plants extends Block {
     public Plants(int x, int y, int index) {
         super(x, y);
         setIndexBlock(index);
-        setBlockHealth(20);
+        setBlockHealth(5);
+        setCurrentBlockHealth(getBlockHealth());
         setTextureID(TextureID.MINIPLANT);
         setCanBeBroken(true);
     }

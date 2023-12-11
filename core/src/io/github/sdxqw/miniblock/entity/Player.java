@@ -12,7 +12,6 @@ import com.badlogic.gdx.physics.box2d.World;
 import io.github.sdxqw.miniblock.MiniBlock;
 import io.github.sdxqw.miniblock.animation.PlayerAnimation;
 import io.github.sdxqw.miniblock.blocks.BlockBreak;
-import io.github.sdxqw.miniblock.blocks.BlockStack;
 import io.github.sdxqw.miniblock.world.WorldGame;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +26,7 @@ public class Player extends Entity {
     private final ShapeRenderer shapeRenderer;
     private final PlayerAnimation playerAnimation;
     private WorldGame worldGame;
-    private State currentState;
+    private State currentState = IDLE;
     private BlockBreak blockBreak;
 
     public Player(int x, int y, float speed, World world, WorldGame worldGame) {
@@ -36,6 +35,7 @@ public class Player extends Entity {
         shapeRenderer = new ShapeRenderer();
         debugRenderer = new Box2DDebugRenderer();
         playerAnimation = new PlayerAnimation();
+        blockBreak = new BlockBreak(worldGame, worldGame.getWorldTerrain().getBlockBreakAnimation());
     }
 
     @Override
@@ -45,7 +45,6 @@ public class Player extends Entity {
         camera.unproject(mousePos);
 
         handleInput();
-        updatePosition(mousePos, getX(), getY());
         interactWithBlock(mousePos, deltaTime);
         playerAnimation.updateFrames(deltaTime);
     }
@@ -54,20 +53,18 @@ public class Player extends Entity {
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && isInRange(mousePos)) {
             int blockX = (int) mousePos.x;
             int blockY = (int) mousePos.y;
-            BlockStack blockStack = worldGame.getWorldTerrain().getChunk(blockX, blockY).getBlock(blockX, blockY);
-            if (blockStack != null) {
-                blockBreak = new BlockBreak(blockStack, worldGame.getWorldTerrain().getBlockBreakAnimation());
+
+            blockBreak.setBlockToBreak(blockX, blockY);
+
+            if (blockBreak != null)
                 blockBreak.breakBlock(deltaTime);
-            }
+
+            float dx = mousePos.x - getX();
+            float dy = mousePos.y - getX();
+            setCurrentState(getDirection(dx, dy));
         } else if (blockBreak != null) {
             blockBreak.stopBreaking();
         }
-    }
-
-    private void updatePosition(Vector3 mousePos, float playerX, float playerY) {
-        float dx = mousePos.x - playerX;
-        float dy = mousePos.y - playerY;
-        setCurrentState(getDirection(dx, dy));
     }
 
     private int getDirection(float dx, float dy) {
@@ -84,18 +81,22 @@ public class Player extends Entity {
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             speedY = getSpeed();
+            setCurrentState(1);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             speedY = -getSpeed();
+            setCurrentState(0);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             speedX = -getSpeed();
+            setCurrentState(3);
         }
 
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             speedX = getSpeed();
+            setCurrentState(2);
         }
 
         getBody2D().setLinearVelocity(speedX, speedY);
@@ -109,7 +110,7 @@ public class Player extends Entity {
             case 1 -> IDLE_BEHIND;
             case 2 -> IDLE_RIGTH;
             case 3 -> IDLE_LEFT;
-            default -> throw new IllegalStateException("Unexpected value: " + direction);
+            default -> throw new IllegalStateException("Direction is invalid: " + direction);
         };
     }
 

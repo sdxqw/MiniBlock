@@ -12,8 +12,8 @@ import lombok.Setter;
 @Getter
 public class Block {
     public static final int BLOCK_SIZE = 1;
-    private float blockHealth = 1;
-    private float currentBlockHealth = blockHealth;
+    private float blockHealth;
+    private float currentBlockHealth;
     private int indexBlock = -1;
 
     private boolean isBreaking = false;
@@ -31,7 +31,6 @@ public class Block {
 
     public void decreaseHealth(float amount, float deltaTime) {
         currentBlockHealth -= amount * deltaTime;
-        System.out.println(currentBlockHealth);
     }
 
     public void renderBlock(SpriteBatch batch, BlockBreakAnimation blockBreakAnimation, SpriteSheets spriteSheets, int x, int y) {
